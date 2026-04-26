@@ -1,112 +1,169 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Ionicons } from "@expo/vector-icons";
+import React, { useEffect, useState } from "react";
+import {
+  Image,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import {
+  CopilotProvider,
+  CopilotStep,
+  useCopilot,
+  walkthroughable,
+} from "react-native-copilot";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Collapsible } from '@/components/ui/collapsible';
-import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
+const WalkthroughableText = walkthroughable(Text);
+const WalkthroughableImage = walkthroughable(Image);
 
-export default function TabTwoScreen() {
+function App() {
+  const { start, copilotEvents } = useCopilot();
+  const [secondStepActive, setSecondStepActive] = useState(true);
+  const [lastEvent, setLastEvent] = useState<string | null>(null);
+
+  useEffect(() => {
+    copilotEvents.on("stepChange", (step) => {
+      if (!step) setLastEvent(`stepChange: ${null}`);
+      else setLastEvent(`stepChange: ${step.name}`);
+    });
+    copilotEvents.on("start", () => {
+      setLastEvent(`start`);
+    });
+    copilotEvents.on("stop", () => {
+      setLastEvent(`stop`);
+    });
+  }, [copilotEvents]);
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
+    <SafeAreaView style={styles.container}>
+      <CopilotStep
+        text="Hey! This is the first step of the tour!"
+        order={1}
+        name="openApp"
+      >
+        <WalkthroughableText style={styles.title}>
+          {'Welcome to the demo of\n"React Native Copilot"'}
+        </WalkthroughableText>
+      </CopilotStep>
+      <View style={styles.middleView}>
+        <CopilotStep
+          active={secondStepActive}
+          text="Here goes your profile picture!"
+          order={2}
+          name="secondText"
+        >
+          <WalkthroughableImage
+            source={{
+              uri: "https://pbs.twimg.com/profile_images/527584017189982208/l3wwN-l-_400x400.jpeg",
+            }}
+            style={styles.profilePhoto}
+          />
+        </CopilotStep>
+        <View style={styles.activeSwitchContainer}>
+          <Text>Profile photo step activated?</Text>
+          <View style={{ flexGrow: 1 }} />
+          <Switch
+            onValueChange={(secondStepActive) =>
+              setSecondStepActive(secondStepActive)
+            }
+            value={secondStepActive}
+          />
+        </View>
+
+        <TouchableOpacity style={styles.button} onPress={() => start()}>
+          <Text style={styles.buttonText}>START THE TUTORIAL!</Text>
+        </TouchableOpacity>
+        <View style={styles.eventContainer}>
+          <Text>{lastEvent && `Last event: ${lastEvent}`}</Text>
+        </View>
+      </View>
+      <View style={styles.row}>
+        <CopilotStep
+          text="Here is an item in the corner of the screen."
+          order={3}
+          name="thirdText"
+        >
+          <WalkthroughableText style={styles.tabItem}>
+            <Ionicons name="apps" size={25} color="#888" />
+          </WalkthroughableText>
+        </CopilotStep>
+
+        <Ionicons
+          style={styles.tabItem}
+          name="airplane"
+          size={25}
+          color="#888"
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Explore
-        </ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
+        <Ionicons style={styles.tabItem} name="globe" size={25} color="#888" />
+        <Ionicons
+          style={styles.tabItem}
+          name="navigate-outline"
+          size={25}
+          color="#888"
         />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful{' '}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+        <Ionicons style={styles.tabItem} name="rainy" size={25} color="#888" />
+      </View>
+    </SafeAreaView>
   );
 }
 
+const AppwithProvider = () => (
+  <CopilotProvider stopOnOutsideClick androidStatusBarVisible>
+    <App />
+  </CopilotProvider>
+);
+
+export default AppwithProvider;
+
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    paddingTop: 25,
   },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
+  title: {
+    fontSize: 24,
+    textAlign: "center",
+  },
+  profilePhoto: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    marginVertical: 20,
+  },
+  middleView: {
+    flex: 1,
+    alignItems: "center",
+  },
+  button: {
+    backgroundColor: "#2980b9",
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 16,
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  tabItem: {
+    flex: 1,
+    textAlign: "center",
+  },
+  activeSwitchContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 20,
+    alignItems: "center",
+    paddingHorizontal: 25,
+  },
+  eventContainer: {
+    marginTop: 20,
   },
 });
