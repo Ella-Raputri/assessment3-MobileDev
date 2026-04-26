@@ -1,3 +1,5 @@
+import WarningModal from "@/components/WarningModal";
+import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { useEvent } from "expo";
 import { useVideoPlayer, VideoView } from "expo-video";
@@ -8,6 +10,7 @@ const VIDEO_1 = "https://www.w3schools.com/html/mov_bbb.mp4";
 const VIDEO_2 = "https://www.w3schools.com/html/movie.mp4";
 
 import { Pressable } from "react-native";
+import { CopilotStep, walkthroughable } from "react-native-copilot";
 
 const ControlButton = ({
   title,
@@ -29,6 +32,9 @@ const ControlButton = ({
 export default function VideoScreen() {
   const [rate, setRate] = useState(1.0);
   const [volume, setVolume] = useState(1.0);
+  const [showWarning, setShowWarning] = useState(false);
+
+  const WalkthroughableView = walkthroughable(View);
 
   const player = useVideoPlayer(VIDEO_1, (player) => {
     player.currentTime = 0;
@@ -68,6 +74,14 @@ export default function VideoScreen() {
         allowsPictureInPicture
       />
 
+      <CopilotStep name="video" order={1} text="This is the video player">
+        <WalkthroughableView
+          collapsable={false}
+          pointerEvents="none"
+          style={styles.videoHighlight}
+        />
+      </CopilotStep>
+
       <View style={styles.properties}>
         <Text style={styles.label}>Playing: {isPlaying ? "Yes" : "No"}</Text>
         <Text style={styles.label}>Speed: {rate.toFixed(2)}x</Text>
@@ -77,6 +91,15 @@ export default function VideoScreen() {
           Active in Background: {player.staysActiveInBackground.toString()}
         </Text>
       </View>
+
+      <Pressable onPress={() => setShowWarning(true)} style={styles.helpBtn}>
+        <Ionicons name="help" size={24} color="white" />
+      </Pressable>
+
+      <WarningModal
+        showWarning={showWarning}
+        closeWarning={() => setShowWarning(false)}
+      />
 
       <ScrollView
         style={styles.controls}
@@ -163,24 +186,41 @@ export default function VideoScreen() {
 }
 
 const styles = StyleSheet.create({
+  helpBtn: {
+    position: "absolute",
+    top: -40,
+    right: 10,
+    backgroundColor: "#000ac9",
+    borderRadius: 20,
+    padding: 10,
+    zIndex: 999,
+  },
   container: {
     flex: 1,
     padding: 10,
     alignItems: "center",
     paddingHorizontal: 50,
-    marginTop: 40,
+    marginTop: 80,
   },
   video: {
     width: "100%",
     height: 220,
     backgroundColor: "#000",
   },
+  videoHighlight: {
+    position: "absolute",
+    top: 0,
+    left: 30,
+    right: 50,
+    height: 260,
+    width: 330,
+  },
   properties: {
     marginBottom: 20,
     marginTop: 20,
   },
   controls: {
-    maxHeight: 240,
+    maxHeight: 200,
     maxWidth: 600,
     borderWidth: 1,
     borderColor: "#ddd",
