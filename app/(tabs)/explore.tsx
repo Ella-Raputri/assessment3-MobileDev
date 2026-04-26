@@ -19,6 +19,45 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const WalkthroughableText = walkthroughable(Text);
 const WalkthroughableImage = walkthroughable(Image);
 
+const CustomTooltip = () => {
+  const { isFirstStep, isLastStep, goToNext, goToPrev, stop, currentStep } =
+    useCopilot();
+
+  return (
+    <View style={styles.tooltipContainer}>
+      <Text style={styles.tooltipText}>{currentStep?.text}</Text>
+
+      <View style={styles.tooltipButtons}>
+        {!isFirstStep && (
+          <TouchableOpacity onPress={goToPrev}>
+            <Text style={styles.tooltipBtn}>Back</Text>
+          </TouchableOpacity>
+        )}
+
+        {!isLastStep ? (
+          <TouchableOpacity onPress={goToNext}>
+            <Text style={styles.tooltipBtn}>Next</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity onPress={stop}>
+            <Text style={styles.tooltipBtn}>Done</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    </View>
+  );
+};
+
+const StepNumber = ({ currentStep }: { currentStep: any }) => {
+  return (
+    <View style={styles.stepNumber}>
+      <Text style={{ color: "#fff", fontWeight: "bold" }}>
+        {currentStep?.order}
+      </Text>
+    </View>
+  );
+};
+
 function App() {
   const { start, copilotEvents } = useCopilot();
   const [secondStepActive, setSecondStepActive] = useState(true);
@@ -112,9 +151,15 @@ function App() {
 
 const AppwithProvider = () => (
   <CopilotProvider
+    overlay="svg"
     stopOnOutsideClick
     androidStatusBarVisible
-    verticalOffset={-20}
+    verticalOffset={-25}
+    arrowColor="#7b29b9"
+    backdropColor="rgba(181, 0, 0, 0.5)"
+    tooltipStyle={styles.tooltip}
+    tooltipComponent={CustomTooltip}
+    stepNumberComponent={StepNumber}
   >
     <App />
   </CopilotProvider>
@@ -169,5 +214,42 @@ const styles = StyleSheet.create({
   },
   eventContainer: {
     marginTop: 20,
+  },
+  tooltip: {
+    borderRadius: 12,
+    padding: 0,
+  },
+
+  tooltipContainer: {
+    backgroundColor: "#fff",
+    padding: 16,
+    borderRadius: 12,
+    elevation: 5,
+  },
+
+  tooltipText: {
+    fontSize: 14,
+    color: "#333",
+    marginBottom: 10,
+  },
+
+  tooltipButtons: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 12,
+  },
+
+  tooltipBtn: {
+    color: "#2980b9",
+    fontWeight: "600",
+  },
+
+  stepNumber: {
+    backgroundColor: "#2980b9",
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
