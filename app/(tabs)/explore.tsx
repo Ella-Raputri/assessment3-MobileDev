@@ -111,7 +111,11 @@ function App() {
 }
 
 const AppwithProvider = () => (
-  <CopilotProvider stopOnOutsideClick androidStatusBarVisible>
+  <CopilotProvider
+    stopOnOutsideClick
+    androidStatusBarVisible
+    verticalOffset={-20}
+  >
     <App />
   </CopilotProvider>
 );
